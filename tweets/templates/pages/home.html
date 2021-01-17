@@ -5,5 +5,45 @@
 {% endblock title %}
 
 {% block content %}
-      Extends from Home DRY
+      <div id="tweets">
+        Replace Me
+      </div>
+
+<script>
+
+    const tweetElement = document.getElementById("tweets")  // how to get html element
+    // tweetElement.innerHTML = "Loading...."  how to change the content or inner html values
+    // var el1 = "<h1>Hi There 1</h1>"
+    // var el2 = "<h1>Hi There 2</h1>"
+    // var el3 = "<h1>Hi There 3</h1>"
+    // tweetElement.innerHTML = el1 + el2 + el3    
+
+    const xhr = new XMLHttpRequest() // xhr = SomeClass()
+    const method = 'GET'
+    const url = "/tweets"
+    const responseType = "json"
+
+    function formatTweetElement(tweet)
+    {
+        var formattedTweet = "<div class='mb-4 border' id='tweet-" + tweet.id + "' ><h1>" + tweet.content + "</h1></div>"
+        return formattedTweet
+    }
+
+    xhr.responseType = responseType
+    xhr.open(method, url)
+    xhr.onload = function(){
+        const serverResponse = xhr.response
+        var listedItems = serverResponse.response
+        var finalTweetStr = ""
+        for (var i = 0; i < listedItems.length; i++){
+            var tweetObj = listedItems[i]
+            var currentItem = formatTweetElement(tweetObj)
+            finalTweetStr += currentItem
+        }
+        tweetElement.innerHTML = finalTweetStr
+    }
+    xhr.send()
+
+</script>
+
 {% endblock content %}
