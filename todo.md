@@ -23,6 +23,7 @@
 
     > Delete
     > Retweet
+    > Liking
 
 3.  Following and Followers
 

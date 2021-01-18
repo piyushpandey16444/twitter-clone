@@ -2,10 +2,26 @@ from django.shortcuts import render
 from django.http import HttpResponse, Http404, JsonResponse
 from .models import Tweet
 import random
+from .forms import TweetForm
 
 
 def home_view(request, *args, **kwargs):
     return render(request, 'pages/home.html')
+
+
+def tweet_create_view(request, *args, **kwargs):
+    """
+    form for creating Tweet content. form can be initialized with or wothout data as shown in the first line.
+    if data is being sent by post method then it will to form or None.
+    Check for validation. 
+    if validated save to db and initilze new form.
+    """
+    form = TweetForm(request.POST or None)
+    if form.is_valid():
+        obj = form.save(commit=False)
+        obj.save()
+        form = TweetForm()
+    return render(request, 'components/form.html', context={"form": form})
 
 
 def tweet_list_view(request, *args, **kwargs):
