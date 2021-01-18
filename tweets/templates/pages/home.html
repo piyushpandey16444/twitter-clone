@@ -5,7 +5,14 @@
 {% endblock title %}
 
 {% block content %}
-      <div id="tweets">
+
+  <div class="row text-center">
+    <div class="column">
+      <h1>Welcome to  TweetMe</h1>
+    </div>
+  </div>
+
+      <div id="tweets" class="row">
         Replace Me
       </div>
 
@@ -22,10 +29,21 @@
     const method = 'GET'
     const url = "/tweets"
     const responseType = "json"
+    
+    // Like button function to handle event 
+    function handleDidLike(tweet_id, currentCount){
+      console.log(tweet_id, currentCount)
+    }
+    
+    // like button return 
+    function LikeBtn(tweet){
+      return "<button class='btn btn-primary btn-small' onclick=handleDidLike(" + tweet.id + "," + tweet.likes + ")>" + tweet.likes + " Likes</button>"
+    }
 
     function formatTweetElement(tweet)
     {
-        var formattedTweet = "<div class='mb-4 border' id='tweet-" + tweet.id + "' ><h1>" + tweet.content + "</h1></div>"
+        var formattedTweet = "<div class='col-12 col-md-10 mx-auto mb-2 border rounded py-3' id='tweet-" + tweet.id + 
+        "' ><h3>" + tweet.content + "</h3><br>"+  LikeBtn(tweet) + "</div>"
         return formattedTweet
     }
 
