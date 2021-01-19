@@ -14,7 +14,7 @@
 
   <div class="row mb-3">
     <div class="col-md-4 mx-auto col-10">
-      <form class="form" action="{% url 'create-tweet' %}" method="post">
+      <form class="form" id="tweet-create-form" action="{% url 'create-tweet' %}" method="post">
         {% csrf_token %}
         <input type="hidden" value="/" name="next"/>
         <textarea name="content" class="form-control" placeholder="Your Tweet..."></textarea>
@@ -28,18 +28,42 @@
       </div>
 
 <script>
+    function handleTweetCreateFormDidSubmit (event){
+      event.preventDefault()
+      console.log(event)
+    }
 
-    const tweetElement = document.getElementById("tweets")  // how to get html element
-    // tweetElement.innerHTML = "Loading...."  how to change the content or inner html values
-    // var el1 = "<h1>Hi There 1</h1>"
-    // var el2 = "<h1>Hi There 2</h1>"
-    // var el3 = "<h1>Hi There 3</h1>"
-    // tweetElement.innerHTML = el1 + el2 + el3    
+    const tweetCreateFormEl = document.getElementById("tweet-create-form")
+    tweetCreateFormEl.addEventListener("submit", handleTweetCreateFormDidSubmit)
 
-    const xhr = new XMLHttpRequest() // xhr = SomeClass()
-    const method = 'GET'
-    const url = "/tweets"
-    const responseType = "json"
+    const tweetEl = document.getElementById("tweets")  // how to get html element
+    
+    // call the function for sending xhr request > takes element as argument that is to be replaced.
+    function loadTweets(tweetElement){
+      const xhr = new XMLHttpRequest() // xhr = SomeClass()
+      const method = 'GET'
+      const url = "/tweets"
+      const responseType = "json"
+
+      xhr.responseType = responseType
+      xhr.open(method, url)
+      xhr.onload = function(){
+          const serverResponse = xhr.response
+          var listedItems = serverResponse.response
+          var finalTweetStr = ""
+          for (var i = 0; i < listedItems.length; i++){
+              var tweetObj = listedItems[i]
+              var currentItem = formatTweetElement(tweetObj)
+              finalTweetStr += currentItem
+          }
+          tweetElement.innerHTML = finalTweetStr
+      }
+      xhr.send()
+
+    }
+
+    // call the function for sending xhr request > takes element as argument that is to be replaced. 
+    loadTweets(tweetEl)
     
     // Like button function to handle event 
     function handleDidLike(tweet_id, currentCount){
@@ -57,21 +81,6 @@
         "' ><h3>" + tweet.content + "</h3><br>"+  LikeBtn(tweet) + "</div>"
         return formattedTweet
     }
-
-    xhr.responseType = responseType
-    xhr.open(method, url)
-    xhr.onload = function(){
-        const serverResponse = xhr.response
-        var listedItems = serverResponse.response
-        var finalTweetStr = ""
-        for (var i = 0; i < listedItems.length; i++){
-            var tweetObj = listedItems[i]
-            var currentItem = formatTweetElement(tweetObj)
-            finalTweetStr += currentItem
-        }
-        tweetElement.innerHTML = finalTweetStr
-    }
-    xhr.send()
 
 </script>
 
