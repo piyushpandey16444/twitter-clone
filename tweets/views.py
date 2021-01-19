@@ -20,6 +20,13 @@ def tweet_create_view(request, *args, **kwargs):
     Check for validation. 
     if validated save to db and initilze new form.
     """
+    # if sent from ajax
+    tweet_obj = TweetForm(request.POST or None)
+    if request.is_ajax() and request.method == "POST" and tweet_obj.is_valid():
+        obj = tweet_obj.save(commit=False)
+        obj.save()
+        return JsonResponse({"tweet_obj": "tweet_obj"}, status=201)
+
     form = TweetForm(request.POST or None)
     next_url = request.POST.get('next') or None
     if form.is_valid():

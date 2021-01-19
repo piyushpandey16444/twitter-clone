@@ -17,7 +17,7 @@
       <form class="form" id="tweet-create-form" action="{% url 'create-tweet' %}" method="post">
         {% csrf_token %}
         <input type="hidden" value="/" name="next"/>
-        <textarea name="content" class="form-control" placeholder="Your Tweet..."></textarea>
+        <textarea id="content" name="content" class="form-control" placeholder="Your Tweet..."></textarea>
         <button type="submit" class="btn btn-primary mt-2">Tweet</button>
       </form>
     </div>
@@ -28,52 +28,50 @@
       </div>
 
 <script>
-    function handleTweetCreateFormDidSubmit (event){
+    
+    // ajax function making POST request for sending data to the backend
+    handleTweetCreateFormDidSubmit = (event) => {
       event.preventDefault()
       const myForm = event.target
       const myFormData = new FormData(myForm)
-
+      data = myFormData.entries()
+      var obj = data.next()
+      var dataRetrived = {}
+      while(undefined !== obj.value){
+        dataRetrived[obj.value[0]] = obj.value[1]
+        obj = data.next()
+      }
+      
       const url = myForm.getAttribute("action")
       const method = myForm.getAttribute("method")
-
-      const xhr = new XMLHttpRequest()
-      xhr.open(method, url)
-      xhr.onload = function(){
-        const serverResponse = xhr.response
-        const tweetEl = document.getElementById("tweets")  // how to get html element
+      
+      $.post(url, dataRetrived, function(response) {
+        const tweetEl = document.getElementById("tweets") // how to get html element
         loadTweets(tweetEl)
-      }
-      xhr.send(myFormData)
-
+        $('#content').val('')
+      }).fail(function() {
+        console.log("data is NOK")
+      })
     }
 
     const tweetCreateFormEl = document.getElementById("tweet-create-form")
     tweetCreateFormEl.addEventListener("submit", handleTweetCreateFormDidSubmit)
 
     const tweetEl = document.getElementById("tweets")  // how to get html element
-    
+
     // call the function for sending xhr request > takes element as argument that is to be replaced.
-    function loadTweets(tweetElement){
-      const xhr = new XMLHttpRequest() // xhr = SomeClass()
-      const method = 'GET'
-      const url = "/tweets"
-      const responseType = "json"
-
-      xhr.responseType = responseType
-      xhr.open(method, url)
-      xhr.onload = function(){
-          const serverResponse = xhr.response
-          var listedItems = serverResponse.response
-          var finalTweetStr = ""
-          for (var i = 0; i < listedItems.length; i++){
-              var tweetObj = listedItems[i]
-              var currentItem = formatTweetElement(tweetObj)
-              finalTweetStr += currentItem
-          }
-          tweetElement.innerHTML = finalTweetStr
-      }
-      xhr.send()
-
+    loadTweets = (tweetElement) => {
+      $.get("/tweets", (response) => {
+        const serverResponse = response
+        var listedItems = serverResponse.response
+        var finalTweetStr = ""
+        for (var i = 0; i < listedItems.length; i++){
+            var tweetObj = listedItems[i]
+            var currentItem = formatTweetElement(tweetObj)
+            finalTweetStr += currentItem
+        }
+        tweetElement.innerHTML = finalTweetStr
+      } )
     }
 
     // call the function for sending xhr request > takes element as argument that is to be replaced. 
@@ -89,6 +87,7 @@
       return "<button class='btn btn-primary btn-small' onclick=handleDidLike(" + tweet.id + "," + tweet.likes + ")>" + tweet.likes + " Likes</button>"
     }
 
+    // home page tweets view
     function formatTweetElement(tweet)
     {
         var formattedTweet = "<div class='col-12 col-md-10 mx-auto mb-2 border border-dark rounded py-3' id='tweet-" + tweet.id + 
