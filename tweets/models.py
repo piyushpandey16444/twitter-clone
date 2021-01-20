@@ -11,6 +11,9 @@ class Tweet(models.Model):
     image = models.FileField(
         upload_to="images/", max_length=100, blank=True, null=True)
 
+    def __str__(self):
+        return self.content
+
     class Meta:
         ordering = ["-id"]
 
