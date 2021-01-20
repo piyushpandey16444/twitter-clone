@@ -21,18 +21,24 @@ def tweet_create_view(request, *args, **kwargs):
     if validated save to db and initilze new form.
     """
     # if sent from ajax
+    if not request.user.is_authenticated:
+        if request.is_ajax():
+            return JsonResponse({"content": "Unauthenticated User"}, status=401)
+        return redirect(settings.LOGIN_URL)
     form = TweetForm(request.POST or None)
     # TODO: if request is POST and from ajax validate and save data and return created instance
     if request.is_ajax() and request.method == "POST" and form.is_valid():
         # obj = Tweet.objects.all()
         # obj.delete()
         tweet_obj = form.save(commit=False)
+        tweet_obj.user = request.user or None
         tweet_obj.save()
         return JsonResponse(tweet_obj.serialize(), status=201)
     if request.is_ajax() and form.errors:
         return JsonResponse(form.errors, status=400)
 
     next_url = request.POST.get('next') or None
+    form.user = request.user or None
     if form.is_valid():
         obj = form.save(commit=False)
         obj.save()

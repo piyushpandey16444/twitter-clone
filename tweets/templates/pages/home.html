@@ -79,6 +79,10 @@
           handleTweetFormError(errorJson, true)
         }
       }
+      else if (response.status === 401 ){
+        const errorResponse = response.responseJSON.content
+        handleTweetFormError(errorResponse, true)
+      }
       else if (response.status === 500 ){
         alert('Something went wrong, please try again later.')
       }
