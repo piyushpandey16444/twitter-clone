@@ -46,9 +46,12 @@
       const method = myForm.getAttribute("method")
       
       $.post(url, dataRetrived, function(response) {
-        const tweetEl = document.getElementById("tweets") // how to get html element
-        loadTweets(tweetEl)
-        $('#content').val('')
+        const newTweet = response
+          const newTweetElement = formatTweetElement(newTweet)
+          console.log("newTweetElement", newTweetElement)
+          $('#content').val('')
+          // const tweetEl = document.getElementById("tweets") // how to get html element
+          // loadTweets(tweetEl)
       }).fail(function() {
         console.log("data is NOK")
       })
@@ -57,9 +60,9 @@
     const tweetCreateFormEl = document.getElementById("tweet-create-form")
     tweetCreateFormEl.addEventListener("submit", handleTweetCreateFormDidSubmit)
 
-    const tweetEl = document.getElementById("tweets")  // how to get html element
+    const tweetsContainerElement = document.getElementById("tweets")  // how to get html element
 
-    // call the function for sending xhr request > takes element as argument that is to be replaced.
+    // call the function for sending ajax get request > takes element as argument that is to be replaced.
     loadTweets = (tweetElement) => {
       $.get("/tweets", (response) => {
         const serverResponse = response
@@ -75,7 +78,7 @@
     }
 
     // call the function for sending xhr request > takes element as argument that is to be replaced. 
-    loadTweets(tweetEl)
+    loadTweets(tweetsContainerElement)
     
     // Like button function to handle event 
     function handleDidLike(tweet_id, currentCount){

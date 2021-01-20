@@ -21,13 +21,15 @@ def tweet_create_view(request, *args, **kwargs):
     if validated save to db and initilze new form.
     """
     # if sent from ajax
-    tweet_obj = TweetForm(request.POST or None)
-    if request.is_ajax() and request.method == "POST" and tweet_obj.is_valid():
-        obj = tweet_obj.save(commit=False)
-        obj.save()
-        return JsonResponse({"tweet_obj": "tweet_obj"}, status=201)
-
     form = TweetForm(request.POST or None)
+    # TODO: if request is POST and from ajax validate and save data and return created instance
+    if request.is_ajax() and request.method == "POST" and form.is_valid():
+        # obj = Tweet.objects.all()
+        # obj.delete()
+        tweet_obj = form.save(commit=False)
+        tweet_obj.save()
+        return JsonResponse(tweet_obj.serialize(), status=201)
+
     next_url = request.POST.get('next') or None
     if form.is_valid():
         obj = form.save(commit=False)
@@ -45,8 +47,7 @@ def tweet_list_view(request, *args, **kwargs):
     return: Json response.
     """
     qs = Tweet.objects.all()
-    tweets_list = [{"id": x.id, "content": x.content,
-                    "likes": random.randint(0, 50)} for x in qs]
+    tweets_list = [x.serialize() for x in qs]
     data = {
         "response": tweets_list,
     }
