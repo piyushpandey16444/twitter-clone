@@ -17,15 +17,15 @@
       <form class="form" id="tweet-create-form" action="{% url 'create-tweet' %}" method="post">
         {% csrf_token %}
         <input type="hidden" value="/" name="next"/>
-        <textarea id="content" name="content" class="form-control" placeholder="Your Tweet..."></textarea>
+        <textarea required="required" id="content" name="content" class="form-control" placeholder="Your Tweet..."></textarea>
         <button type="submit" class="btn btn-primary mt-2">Tweet</button>
       </form>
     </div>
   </div>
 
-      <div id="tweets" class="row">
-        Replace Me
-      </div>
+  <div id="tweets" class="row">
+    Me
+  </div>
 
 <script>
     
@@ -47,11 +47,13 @@
       
       $.post(url, dataRetrived, function(response) {
         const newTweet = response
-          const newTweetElement = formatTweetElement(newTweet)
-          console.log("newTweetElement", newTweetElement)
-          $('#content').val('')
-          // const tweetEl = document.getElementById("tweets") // how to get html element
-          // loadTweets(tweetEl)
+        const newTweetElement = formatTweetElement(newTweet)
+        const ogHtml = tweetsContainerElement.innerHTML
+        tweetsContainerElement.innerHTML = newTweetElement + ogHtml
+        myForm.reset()
+        // $('#content').val('')
+        // const tweetEl = document.getElementById("tweets") // how to get html element
+        // loadTweets(tweetEl)
       }).fail(function() {
         console.log("data is NOK")
       })
