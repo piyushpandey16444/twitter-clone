@@ -23,7 +23,7 @@ def tweet_create_view(request, *args, **kwargs):
     # if sent from ajax
     if not request.user.is_authenticated:
         if request.is_ajax():
-            return JsonResponse({"content": "Unauthenticated User"}, status=401)
+            return JsonResponse({}, status=401)
         return redirect(settings.LOGIN_URL)
     form = TweetForm(request.POST or None)
     # TODO: if request is POST and from ajax validate and save data and return created instance
