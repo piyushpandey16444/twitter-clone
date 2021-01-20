@@ -16,6 +16,7 @@
     <div class="col-md-4 mx-auto col-10">
       <form class="form" id="tweet-create-form" action="{% url 'create-tweet' %}" method="post">
         {% csrf_token %}
+        <div id="tweet-create-error" class="d-none alert alert-danger"></div>
         <input type="hidden" value="/" name="next"/>
         <textarea required="required" id="content" name="content" class="form-control" placeholder="Your Tweet..."></textarea>
         <button type="submit" class="btn btn-primary mt-2">Tweet</button>
@@ -28,77 +29,105 @@
   </div>
 
 <script>
-    
-    // ajax function making POST request for sending data to the backend
-    handleTweetCreateFormDidSubmit = (event) => {
-      event.preventDefault()
-      const myForm = event.target
-      const myFormData = new FormData(myForm)
-      data = myFormData.entries()
-      var obj = data.next()
-      var dataRetrived = {}
-      while(undefined !== obj.value){
-        dataRetrived[obj.value[0]] = obj.value[1]
-        obj = data.next()
-      }
-      
-      const url = myForm.getAttribute("action")
-      const method = myForm.getAttribute("method")
-      
-      $.post(url, dataRetrived, function(response) {
-        const newTweet = response
-        const newTweetElement = formatTweetElement(newTweet)
-        const ogHtml = tweetsContainerElement.innerHTML
-        tweetsContainerElement.innerHTML = newTweetElement + ogHtml
-        myForm.reset()
-        // $('#content').val('')
-        // const tweetEl = document.getElementById("tweets") // how to get html element
-        // loadTweets(tweetEl)
-      }).fail(function() {
-        console.log("data is NOK")
-      })
+
+  // function for handling error while creating tweets
+  handleTweetFormError = (msg, display) => {
+    const errorHandleElement = $("#tweet-create-error")
+    if (display === true ){
+      // show error
+      errorHandleElement.removeClass("d-none")
+      errorHandleElement.addClass("d-block alert alert-danger font-weight-bold")
+      errorHandleElement.text(msg)
     }
-
-    const tweetCreateFormEl = document.getElementById("tweet-create-form")
-    tweetCreateFormEl.addEventListener("submit", handleTweetCreateFormDidSubmit)
-
-    const tweetsContainerElement = document.getElementById("tweets")  // how to get html element
-
-    // call the function for sending ajax get request > takes element as argument that is to be replaced.
-    loadTweets = (tweetElement) => {
-      $.get("/tweets", (response) => {
-        const serverResponse = response
-        var listedItems = serverResponse.response
-        var finalTweetStr = ""
-        for (var i = 0; i < listedItems.length; i++){
-            var tweetObj = listedItems[i]
-            var currentItem = formatTweetElement(tweetObj)
-            finalTweetStr += currentItem
+    else{
+      // hide error div
+      errorHandleElement.addClass("d-none alert alert-danger")
+    }
+  }
+    
+  // ajax function making POST request for sending data to the backend
+  handleTweetCreateFormDidSubmit = (event) => {
+    event.preventDefault()
+    const myForm = event.target
+    const myFormData = new FormData(myForm)
+    data = myFormData.entries()
+    var obj = data.next()
+    var dataRetrived = {}
+    while(undefined !== obj.value){
+      dataRetrived[obj.value[0]] = obj.value[1]
+      obj = data.next()
+    }
+    
+    const url = myForm.getAttribute("action")
+    const method = myForm.getAttribute("method")
+    
+    $.post(url, dataRetrived, (response) => {
+      handleTweetFormError("", false)
+      const newTweet = response
+      const newTweetElement = formatTweetElement(newTweet)
+      const ogHtml = tweetsContainerElement.innerHTML
+      tweetsContainerElement.innerHTML = newTweetElement + ogHtml
+      myForm.reset()
+      // $('#content').val('')
+      // const tweetEl = document.getElementById("tweets") // how to get html element
+      // loadTweets(tweetEl)
+      
+    }).fail((response) => {
+      if (response.status === 400){
+        const errorJson = response.responseJSON.content[0]
+        if (errorJson) {
+          handleTweetFormError(errorJson, true)
         }
-        tweetElement.innerHTML = finalTweetStr
-      } )
-    }
+      }
+      else if (response.status === 500 ){
+        alert('Something went wrong, please try again later.')
+      }
+      else {
+        alert('Server is down, please try again later.')
+      }
+    })
+  }
 
-    // call the function for sending xhr request > takes element as argument that is to be replaced. 
-    loadTweets(tweetsContainerElement)
-    
-    // Like button function to handle event 
-    function handleDidLike(tweet_id, currentCount){
-      console.log(tweet_id, currentCount)
-    }
-    
-    // like button return 
-    function LikeBtn(tweet){
-      return "<button class='btn btn-primary btn-small' onclick=handleDidLike(" + tweet.id + "," + tweet.likes + ")>" + tweet.likes + " Likes</button>"
-    }
+  const tweetCreateFormEl = document.getElementById("tweet-create-form")
+  tweetCreateFormEl.addEventListener("submit", handleTweetCreateFormDidSubmit)
 
-    // home page tweets view
-    function formatTweetElement(tweet)
-    {
-        var formattedTweet = "<div class='col-12 col-md-10 mx-auto mb-2 border border-dark rounded py-3' id='tweet-" + tweet.id + 
-        "' ><h3>" + tweet.content + "</h3><br>"+  LikeBtn(tweet) + "</div>"
-        return formattedTweet
-    }
+  const tweetsContainerElement = document.getElementById("tweets")  // how to get html element
+
+  // call the function for sending ajax get request > takes element as argument that is to be replaced.
+  loadTweets = (tweetElement) => {
+    $.get("/tweets", (response) => {
+      const serverResponse = response
+      var listedItems = serverResponse.response
+      var finalTweetStr = ""
+      for (var i = 0; i < listedItems.length; i++){
+          var tweetObj = listedItems[i]
+          var currentItem = formatTweetElement(tweetObj)
+          finalTweetStr += currentItem
+      }
+      tweetElement.innerHTML = finalTweetStr
+    } )
+  }
+
+  // call the function for sending xhr request > takes element as argument that is to be replaced. 
+  loadTweets(tweetsContainerElement)
+  
+  // Like button function to handle event 
+  function handleDidLike(tweet_id, currentCount){
+    console.log(tweet_id, currentCount)
+  }
+  
+  // like button return 
+  function LikeBtn(tweet){
+    return "<button class='btn btn-primary btn-small' onclick=handleDidLike(" + tweet.id + "," + tweet.likes + ")>" + tweet.likes + " Likes</button>"
+  }
+
+  // home page tweets view
+  function formatTweetElement(tweet)
+  {
+      var formattedTweet = "<div class='col-12 col-md-10 mx-auto mb-2 border border-dark rounded py-3' id='tweet-" + tweet.id + 
+      "' ><h3>" + tweet.content + "</h3><br>"+  LikeBtn(tweet) + "</div>"
+      return formattedTweet
+  }
 
 </script>
 

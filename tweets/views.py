@@ -29,6 +29,8 @@ def tweet_create_view(request, *args, **kwargs):
         tweet_obj = form.save(commit=False)
         tweet_obj.save()
         return JsonResponse(tweet_obj.serialize(), status=201)
+    if request.is_ajax() and form.errors:
+        return JsonResponse(form.errors, status=400)
 
     next_url = request.POST.get('next') or None
     if form.is_valid():
