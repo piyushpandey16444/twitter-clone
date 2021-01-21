@@ -5,15 +5,25 @@ import random
 from .forms import TweetForm
 from django.utils.http import is_safe_url
 from django.conf import settings
+from .serializers import TweetSerializer
 
 ALLOWED_HOSTS = settings.ALLOWED_HOSTS
+
+
+def tweet_create_view(request, *args, **kwargs):
+    data = request.POST or None
+    serializer = TweetSerializer(data=data)
+    if serializer.is_valid():
+        serializer.save(user=request.user)
+        return JsonResponse(serializer.data, status=201)
+    return JsonResponse({}, status=400)
 
 
 def home_view(request, *args, **kwargs):
     return render(request, 'pages/home.html')
 
 
-def tweet_create_view(request, *args, **kwargs):
+def tweet_create_view_pure_django(request, *args, **kwargs):
     """
     form for creating Tweet content. form can be initialized with or wothout data as shown in the first line.
     if data is being sent by post method then it will to form or None.
@@ -36,7 +46,6 @@ def tweet_create_view(request, *args, **kwargs):
         return JsonResponse(tweet_obj.serialize(), status=201)
     if request.is_ajax() and form.errors:
         return JsonResponse(form.errors, status=400)
-
     next_url = request.POST.get('next') or None
     form.user = request.user or None
     if form.is_valid():
