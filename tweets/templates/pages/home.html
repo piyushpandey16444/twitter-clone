@@ -30,6 +30,22 @@
 
 <script>
 
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+  }
+
   // function for handling error while creating tweets
   handleTweetFormError = (msg, display) => {
     const errorHandleElement = $("#tweet-create-error")
@@ -122,27 +138,52 @@
   loadTweets(tweetsContainerElement)
   
   // Like button function to handle event 
-  handleDidLike = (tweet_id, currentCount) => {
+  handleTweetAction = (tweet_id, currentCount, action) => {
     const url = "{% url 'tweet-action-view' %}"
+    const csrftoken = getCookie('csrftoken');
+    const method = 'POST'
     const data = JSON.stringify({
       id: tweet_id,
-      action: "like"
+      action: action
     });
-    $.post(url, data, (response) => {
-      console.log('response: ', response)
-    });
+    const xhr = new XMLHttpRequest()
+    xhr.open(method, url)
+    xhr.setRequestHeader("Content-Type", "application/json")
+    xhr.setRequestHeader("HTTP_X_REQUESTED_WITH", "XMLHttpRequest")
+    xhr.setRequestHeader("X_Requested-With", "XMLHttpRequest")
+    xhr.setRequestHeader("X-CSRFToken", csrftoken)
+    xhr.onload = () => {
+      loadTweets(tweetsContainerElement)
+    }
+    xhr.send(data)
+  }
+
+
+  // retweet button return 
+  function reTweetBtn(tweet){
+    return "<button class='btn btn-outline-success btn-small' onclick=handleTweetAction(" + tweet.id + "," + tweet.likes + ",'retweet')>Retweet</button>"
+  }
+
+
+  // unlike button return 
+  function unLikeBtn(tweet){
+    return "<button class='btn btn-outline-primary btn-small' onclick=handleTweetAction(" + tweet.id + "," + tweet.likes + ",'unlike')>Unlike</button>"
   }
   
   // like button return 
   function LikeBtn(tweet){
-    return "<button class='btn btn-primary btn-small' onclick=handleDidLike(" + tweet.id + "," + tweet.likes + ")>" + tweet.likes + " Likes</button>"
+    return "<button class='btn btn-primary btn-small' onclick=handleTweetAction(" + tweet.id + "," + tweet.likes + ",'like')>" + tweet.likes + " Likes</button>"
   }
 
   // home page tweets view
   function formatTweetElement(tweet)
   {
       var formattedTweet = "<div class='col-12 col-md-10 mx-auto mb-2 border border-dark rounded py-3' id='tweet-" + tweet.id + 
-      "' ><h3>" + tweet.content + "</h3><br>"+  LikeBtn(tweet) + "</div>"
+      "' ><h3>" + tweet.content + "</h3><br>"+  
+      LikeBtn(tweet) +
+      unLikeBtn(tweet) +
+      reTweetBtn(tweet) +
+      "</div>"
       return formattedTweet
   }
 

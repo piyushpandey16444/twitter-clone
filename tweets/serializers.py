@@ -10,6 +10,10 @@ class TweetActionSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
     action = serializers.CharField()
 
+    class Meta:
+        model = Tweet
+        fields = ['id', 'action']
+
     def validate_action(self, value):
         value = value.lower().strip()
         if not value in TWEET_ACTION_OPTIONS:

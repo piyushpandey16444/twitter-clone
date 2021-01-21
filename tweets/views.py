@@ -78,8 +78,7 @@ def tweet_action_view(request, *args, **kwargs):
     id is required
     Action options are like, unlike, retweet
     """
-    print('called', request.POST)
-    serializer = TweetActionSerializer(data=request.POST)
+    serializer = TweetActionSerializer(data=request.data)
     if serializer.is_valid(raise_exception=True):
         data = serializer.validated_data
         tweet_id = data.get('id')
@@ -89,12 +88,14 @@ def tweet_action_view(request, *args, **kwargs):
             return Response({}, status=status.HTTP_404_NOT_FOUND)  # not found
         obj = qs.first()
         if action == 'like':
-            obj.likes.add(user=request.user)
+            obj.likes.add(request.user)
+            serializer = TweetSerializer(obj)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         elif action == 'unlike':
-            obj.likes.remove(user=request.user)
+            obj.likes.remove(request.user)
         elif action == 'retweet':
             pass  # TODO
-        return Response({"message": "Tweet removed."}, status=status.HTTP_204_NO_CONTENT)
+        return Response({}, status=status.HTTP_204_NO_CONTENT)
 
 
 def home_view(request, *args, **kwargs):
