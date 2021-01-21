@@ -5,7 +5,7 @@ import random
 from .forms import TweetForm
 from django.utils.http import is_safe_url
 from django.conf import settings
-from .serializers import TweetSerializer
+from .serializers import TweetSerializer, TweetActionSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
@@ -69,6 +69,31 @@ def tweet_delete_view(request, tweet_id, *args, **kwargs):
     obj = qs.first()
     obj.delete()
     return Response({"message": "Tweet removed."}, status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def tweet_action_view(request, *args, **kwargs):
+    """
+    id is required
+    Action options are like, unlike, retweet
+    """
+    serializer = TweetActionSerializer(request.POST)
+    if serializer.is_valid(raise_exception=True):
+        data = serializer.validated_data
+        tweet_id = data.get('id')
+        action = data.get('action')
+        qs = Tweet.objects.filter(id=tweet_id)
+        if not qs.exists():
+            return Response({}, status=status.HTTP_404_NOT_FOUND)  # not found
+        obj = qs.first()
+        if action == 'like':
+            obj.likes.add(user=request.user)
+        elif action == 'unlike':
+            obj.likes.remove(user=request.user)
+        elif action == 'retweet':
+            pass  # TODO
+        return Response({"message": "Tweet removed."}, status=status.HTTP_204_NO_CONTENT)
 
 
 def home_view(request, *args, **kwargs):
