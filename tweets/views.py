@@ -6,6 +6,7 @@ from .forms import TweetForm
 from django.utils.http import is_safe_url
 from django.conf import settings
 from .serializers import TweetSerializer
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated
@@ -47,10 +48,27 @@ def tweet_detail_view(request, tweet_id, *args, **kwargs):
     """
     qs = Tweet.objects.filter(id=tweet_id)
     if not qs.exists():
-        return Response({}, status=404)  # not found
+        return Response({}, status=status.HTTP_404_NOT_FOUND)  # not found
     obj = qs.first()
     serializer = TweetSerializer(obj)
-    return Response(serializer.data, status=200)  # found status
+    return Response(serializer.data, status=status.HTTP_200_OK)  # found status
+
+
+@api_view(['DELETE', 'POST'])
+@permission_classes([IsAuthenticated])
+def tweet_delete_view(request, tweet_id, *args, **kwargs):
+    """
+    DRF view to delete tweet.
+    """
+    qs = Tweet.objects.filter(id=tweet_id)
+    if not qs.exists():
+        return Response({}, status=status.HTTP_404_NOT_FOUND)  # not found
+    qs = qs.filter(user=request.user)
+    if not qs:
+        return Response({"message": "You cannot delete this Tweet"}, status=status.HTTP_403_FORBIDDEN)
+    obj = qs.first()
+    obj.delete()
+    return Response({"message": "Tweet removed."}, status=status.HTTP_204_NO_CONTENT)
 
 
 def home_view(request, *args, **kwargs):
