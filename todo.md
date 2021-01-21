@@ -48,3 +48,10 @@
    }
 
    })
+
+4. Obj creation of Mnay2many field
+
+obj.likes.add()
+obj.likes.remove()
+obj.likes.set() # requires qs
+TweetLikeUser.objects.create(user=user, tweet=id)
