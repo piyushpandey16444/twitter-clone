@@ -7,13 +7,17 @@ from django.utils.http import is_safe_url
 from django.conf import settings
 from .serializers import TweetSerializer
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import SessionAuthentication
 
 
 ALLOWED_HOSTS = settings.ALLOWED_HOSTS
 
 
 @api_view(['POST'])  # the http method the client sent is POST
+# @authentication_classes([SessionAuthentication])
+@permission_classes([IsAuthenticated])
 def tweet_create_view(request, *args, **kwargs):
     """
     DRF view response, serialized data being sent back.
