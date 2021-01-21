@@ -83,6 +83,7 @@ def tweet_action_view(request, *args, **kwargs):
         data = serializer.validated_data
         tweet_id = data.get('id')
         action = data.get('action')
+        content = data.get('content')
         qs = Tweet.objects.filter(id=tweet_id)
         if not qs.exists():
             return Response({}, status=status.HTTP_404_NOT_FOUND)  # not found
@@ -94,7 +95,12 @@ def tweet_action_view(request, *args, **kwargs):
         elif action == 'unlike':
             obj.likes.remove(request.user)
         elif action == 'retweet':
-            pass  # TODO
+            new_tweet = Tweet.objects.create(
+                user=request.user,
+                parent=obj,
+                content=content)
+            serializer = TweetSerializer(new_tweet)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         return Response({}, status=status.HTTP_204_NO_CONTENT)
 
 

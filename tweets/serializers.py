@@ -9,10 +9,11 @@ TWEET_ACTION_OPTIONS = settings.TWEET_ACTION_OPTIONS
 class TweetActionSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
     action = serializers.CharField()
+    content = serializers.CharField(allow_blank=True, required=False)
 
     class Meta:
         model = Tweet
-        fields = ['id', 'action']
+        fields = ['id', 'action', 'content']
 
     def validate_action(self, value):
         value = value.lower().strip()

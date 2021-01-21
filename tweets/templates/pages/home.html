@@ -161,18 +161,17 @@
 
   // retweet button return 
   function reTweetBtn(tweet){
-    return "<button class='btn btn-outline-success btn-small' onclick=handleTweetAction(" + tweet.id + "," + tweet.likes + ",'retweet')>Retweet</button>"
+    return "<button class='btn btn-outline-success btn-small m-1' onclick=handleTweetAction(" + tweet.id + "," + tweet.likes + ",'retweet')>Retweet</button>"
   }
-
 
   // unlike button return 
   function unLikeBtn(tweet){
-    return "<button class='btn btn-outline-primary btn-small' onclick=handleTweetAction(" + tweet.id + "," + tweet.likes + ",'unlike')>Unlike</button>"
+    return "<button class='btn btn-outline-primary btn-small m-1' onclick=handleTweetAction(" + tweet.id + "," + tweet.likes + ",'unlike')>Unlike</button>"
   }
   
   // like button return 
   function LikeBtn(tweet){
-    return "<button class='btn btn-primary btn-small' onclick=handleTweetAction(" + tweet.id + "," + tweet.likes + ",'like')>" + tweet.likes + " Likes</button>"
+    return "<button class='btn btn-primary btn-small m-1' onclick=handleTweetAction(" + tweet.id + "," + tweet.likes + ",'like')>" + tweet.likes + " Likes</button>"
   }
 
   // home page tweets view
