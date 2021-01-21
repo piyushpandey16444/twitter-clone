@@ -122,8 +122,15 @@
   loadTweets(tweetsContainerElement)
   
   // Like button function to handle event 
-  function handleDidLike(tweet_id, currentCount){
-    console.log(tweet_id, currentCount)
+  handleDidLike = (tweet_id, currentCount) => {
+    const url = "{% url 'tweet-action-view' %}"
+    const data = JSON.stringify({
+      id: tweet_id,
+      action: "like"
+    });
+    $.post(url, data, (response) => {
+      console.log('response: ', response)
+    });
   }
   
   // like button return 
