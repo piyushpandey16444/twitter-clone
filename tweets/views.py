@@ -6,17 +6,47 @@ from .forms import TweetForm
 from django.utils.http import is_safe_url
 from django.conf import settings
 from .serializers import TweetSerializer
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+
 
 ALLOWED_HOSTS = settings.ALLOWED_HOSTS
 
 
+@api_view(['POST'])  # the http method the client sent is POST
 def tweet_create_view(request, *args, **kwargs):
-    data = request.POST or None
-    serializer = TweetSerializer(data=data)
-    if serializer.is_valid():
+    """
+    DRF view response, serialized data being sent back.
+    check for post request, raise error, user authentication check
+    """
+    serializer = TweetSerializer(data=request.POST)
+    if serializer.is_valid(raise_exception=True):
         serializer.save(user=request.user)
-        return JsonResponse(serializer.data, status=201)
-    return JsonResponse({}, status=400)
+        return Response(serializer.data, status=201)
+    return Response({}, status=400)
+
+
+@api_view(['GET'])
+def tweet_list_view(request, *args, **kwargs):
+    """
+    DRF view response, serialized data being sent back.
+    """
+    qs = Tweet.objects.all()
+    serializer = TweetSerializer(qs, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+def tweet_detail_view(request, tweet_id, *args, **kwargs):
+    """
+    DRF view response, serialized data being sent back. Its a detail view sending content.
+    """
+    qs = Tweet.objects.filter(id=tweet_id)
+    if not qs.exists():
+        return Response({}, status=404)  # not found
+    obj = qs.first()
+    serializer = TweetSerializer(obj)
+    return Response(serializer.data, status=200)  # found status
 
 
 def home_view(request, *args, **kwargs):
@@ -57,7 +87,7 @@ def tweet_create_view_pure_django(request, *args, **kwargs):
     return render(request, 'components/form.html', context={"form": form})
 
 
-def tweet_list_view(request, *args, **kwargs):
+def tweet_list_view_pure_django(request, *args, **kwargs):
     """
     REST API VIEW
     Can be consumed by using any thing including JS, react, JAVA etc..
@@ -71,7 +101,7 @@ def tweet_list_view(request, *args, **kwargs):
     return JsonResponse(data)
 
 
-def tweet_detail_view(request, tweet_id, *args, **kwargs):
+def tweet_detail_view_pure_django(request, tweet_id, *args, **kwargs):
     """
     REST API VIEW
     Can be consumed by using any thing including JS, react, JAVA etc..

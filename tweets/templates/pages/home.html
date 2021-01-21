@@ -103,8 +103,7 @@
   // call the function for sending ajax get request > takes element as argument that is to be replaced.
   loadTweets = (tweetElement) => {
     $.get("/tweets", (response) => {
-      const serverResponse = response
-      var listedItems = serverResponse.response
+      var listedItems = response
       var finalTweetStr = ""
       for (var i = 0; i < listedItems.length; i++){
           var tweetObj = listedItems[i]
