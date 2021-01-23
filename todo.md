@@ -23,6 +23,10 @@
 
     > Delete
     > Retweet
+
+        -> Readonly serializer
+        -> Create only serializer
+
     > Liking
 
 3.  Following and Followers
